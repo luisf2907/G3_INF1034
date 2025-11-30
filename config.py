@@ -1,0 +1,52 @@
+"""
+Configurações e constantes do jogo Dino Runner
+"""
+
+# Configurações da tela
+LARGURA = 1280
+ALTURA = 720
+LARGURA_VIRTUAL = 320
+ALTURA_VIRTUAL = 180
+FPS = 60
+
+# (COR_CEU removido pois usaremos imagem)
+
+# Tiles
+TILE_SIZE = 16
+
+# Física do jogador
+DINO_VELOCIDADE = 2
+DINO_GRAVIDADE = 0.5
+DINO_FORCA_PULO = -6
+
+# Hitbox do jogador
+HITBOX_OFFSET_X = 5
+HITBOX_OFFSET_Y = 2
+HITBOX_LARGURA = 14
+HITBOX_ALTURA = 19
+
+# Animação
+VELOCIDADE_ANIMACAO_IDLE = 30
+VELOCIDADE_ANIMACAO_MOVE = 6
+VELOCIDADE_ANIMACAO_JUMP = 15
+VELOCIDADE_ANIMACAO_HURT = 8
+VELOCIDADE_ANIMACAO_DEAD = 10
+
+# Sprites
+SPRITE_LARGURA = 24
+SPRITE_ALTURA = 24
+FRAMES_IDLE = 3
+FRAMES_MOVE = 6
+FRAMES_JUMP = 4
+FRAMES_HURT = 4
+FRAMES_DEAD = 5
+
+# Sistema de dano
+DURACAO_HURT = 60  # frames de duração da animação de dano
+DURACAO_INVENCIBILIDADE = 120  # frames de invencibilidade após dano
+
+# Sistema de vidas
+VIDAS_INICIAIS = 3
+ICONE_VIDA_ESPACAMENTO = 20  # Espaçamento entre ícones
+ICONE_VIDA_MARGEM_X = 5  # Margem da esquerda
+ICONE_VIDA_MARGEM_Y = 5  # Margem do topo
