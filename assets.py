@@ -81,21 +81,21 @@ class Assets:
             # ---------------------------------------------
 
             # Tiles do mapa
-            self.tile_grama = pygame.image.load('grass.png').convert_alpha()
-            self.tile_terra = pygame.image.load('terra.png').convert_alpha()
-            self.tile_ponta_esq = pygame.image.load('grass_ponta_esquerda.png').convert_alpha()
-            self.tile_ponta_dir = pygame.image.load('grass_ponta_direita.png').convert_alpha()
-            self.tile_terra_esq_dir = pygame.image.load('terra_esquerda_direita.png').convert_alpha()
-            self.tile_terra_dir_esq = pygame.image.load('terra_direita_esquerda.png').convert_alpha()
-            self.tile_terra_lateral_esq = pygame.image.load('terra_lateral_esquerda.png').convert_alpha()
-            self.tile_terra_lateral_dir = pygame.image.load('terra_lateral_direita.png').convert_alpha()
+            self.tile_grama = pygame.image.load('assets/grass.png').convert_alpha()
+            self.tile_terra = pygame.image.load('assets/terra.png').convert_alpha()
+            self.tile_ponta_esq = pygame.image.load('assets/grass_ponta_esquerda.png').convert_alpha()
+            self.tile_ponta_dir = pygame.image.load('assets/grass_ponta_direita.png').convert_alpha()
+            self.tile_terra_esq_dir = pygame.image.load('assets/terra_esquerda_direita.png').convert_alpha()
+            self.tile_terra_dir_esq = pygame.image.load('assets/terra_direita_esquerda.png').convert_alpha()
+            self.tile_terra_lateral_esq = pygame.image.load('assets/terra_lateral_esquerda.png').convert_alpha()
+            self.tile_terra_lateral_dir = pygame.image.load('assets/terra_lateral_direita.png').convert_alpha()
             
             # Sprite sheets do dino
-            sprite_sheet_idle = pygame.image.load('idle.png').convert_alpha()
-            sprite_sheet_move = pygame.image.load('move.png').convert_alpha()
-            sprite_sheet_jump = pygame.image.load('jump.png').convert_alpha()
-            sprite_sheet_hurt = pygame.image.load('hurt.png').convert_alpha()
-            sprite_sheet_dead = pygame.image.load('dead.png').convert_alpha()
+            sprite_sheet_idle = pygame.image.load('assets/idle.png').convert_alpha()
+            sprite_sheet_move = pygame.image.load('assets/move.png').convert_alpha()
+            sprite_sheet_jump = pygame.image.load('assets/jump.png').convert_alpha()
+            sprite_sheet_hurt = pygame.image.load('assets/hurt.png').convert_alpha()
+            sprite_sheet_dead = pygame.image.load('assets/dead.png').convert_alpha()
             
             # Separar frames das animações
             self.dino_idle = self._extrair_frames(sprite_sheet_idle, FRAMES_IDLE)
@@ -105,13 +105,13 @@ class Assets:
             self.dino_dead = self._extrair_frames(sprite_sheet_dead, FRAMES_DEAD)
             
             # Sprite sheet do meteoro (3 frames, 10x19 cada)
-            sprite_sheet_meteoro = pygame.image.load('meteoro.png').convert_alpha()
+            sprite_sheet_meteoro = pygame.image.load('assets/meteoro.png').convert_alpha()
             for i in range(3):
                 frame = sprite_sheet_meteoro.subsurface((i * 10, 0, 10, 19))
                 self.meteoro_sprites.append(frame)
             
             # Ícone de vida
-            self.icone_vida = pygame.image.load('vida.png').convert_alpha()
+            self.icone_vida = pygame.image.load('assets/vida.png').convert_alpha()
             
         except FileNotFoundError as e:
             print(f"Erro: Imagem não encontrada -> {e}")
