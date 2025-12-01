@@ -28,7 +28,6 @@ class Meteoro:
         self.largura = 10
         self.altura = 19
         
-        # --- NOVO: Calcular rotação e criar sprites rotacionados ---
         # Calculamos o ângulo baseado na velocidade horizontal e vertical
         # Math.atan2 retorna o ângulo em radianos, convertemos para graus.
         angulo = math.degrees(math.atan2(self.vel_x, self.vel_y))
@@ -82,7 +81,6 @@ class Meteoro:
             # Pegamos a imagem já rotacionada
             imagem = self.sprites_rotacionados[self.frame_atual]
             
-            # --- AJUSTE FINO DE POSIÇÃO ---
             # Quando giramos uma imagem, o tamanho do retângulo dela muda.
             # Para que ela não fique deslocada em relação à hitbox, pegamos o centro.
             rect_imagem = imagem.get_rect()

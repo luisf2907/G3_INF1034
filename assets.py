@@ -70,7 +70,6 @@ class Assets:
     def carregar_recursos(self):
         """Carrega todas as imagens do jogo"""
         try:
-            # --- Carregar e escalar o background ---
             try:
                 bg_raw = pygame.image.load('background.png').convert()
                 self.background = pygame.transform.scale(bg_raw, (LARGURA_VIRTUAL, ALTURA_VIRTUAL))
@@ -78,7 +77,6 @@ class Assets:
                 # Se não achar o background, cria um gradiente de pôr do sol apocalíptico
                 print("background.png não encontrado. Usando gradiente apocalíptico.")
                 self.background = self._criar_background_apocaliptico()
-            # ---------------------------------------------
 
             # Tiles do mapa
             self.tile_grama = pygame.image.load('assets/grass.png').convert_alpha()

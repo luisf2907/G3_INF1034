@@ -9,8 +9,6 @@ LARGURA_VIRTUAL = 320
 ALTURA_VIRTUAL = 180
 FPS = 60
 
-# (COR_CEU removido pois usaremos imagem)
-
 # Tiles
 TILE_SIZE = 16
 

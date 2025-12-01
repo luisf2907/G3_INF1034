@@ -53,7 +53,6 @@ class Mapa:
         for r in range(rows):
             for c in range(cols):
                 superficie.blit(bg, (c * bg_w, r * bg_h))
-        # -----------------------------------------------------
         
         for linha_idx, linha in enumerate(self.dados):
             for coluna_idx, tile in enumerate(linha):
