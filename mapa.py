@@ -36,6 +36,27 @@ class Mapa:
                 "LLLLLLRRRRRRLLLLL<><>><>"
             ]
     
+    def extrair_ovos(self):
+        """Extrai posições dos ovos e remove do mapa"""
+        ovos = []
+        novo_mapa = []
+        
+        for y, linha in enumerate(self.dados):
+            nova_linha = ""
+            for x, char in enumerate(linha):
+                if char == 'O':
+                    ovos.append((x * TILE_SIZE, y * TILE_SIZE))
+                    nova_linha += " "  # Remove o ovo do mapa visual
+                else:
+                    nova_linha += char
+            novo_mapa.append(nova_linha)
+            
+        self.dados = novo_mapa
+        # Atualiza a superfície pré-renderizada sem os 'O's
+        self.superficie = self._pre_renderizar()
+        
+        return ovos
+    
     def _pre_renderizar(self):
         """Renderiza o mapa completo antecipadamente para otimização"""
         superficie = pygame.Surface((self.largura_px, self.altura_px))

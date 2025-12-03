@@ -45,7 +45,7 @@ class Meteoro:
     
     def atualizar(self, mapa):
         if not self.ativo:
-            return
+            return False
         
         # Movimento
         self.x += self.vel_x
@@ -57,18 +57,21 @@ class Meteoro:
         
         if colisoes:
             self.ativo = False
-            return
+            # Retorna o primeiro retângulo colidido para saber onde criar o fogo
+            return colisoes[0]
             
         # Limites do mapa
         if self.y > mapa.altura_px:
             self.ativo = False
-            return
+            return None
         
         # Atualizar animação
         self.contador_animacao += 1
         if self.contador_animacao >= self.velocidade_animacao:
             self.frame_atual = (self.frame_atual + 1) % 3
             self.contador_animacao = 0
+            
+        return None
     
     def desenhar(self, superficie, camera_x, camera_y):
         if not self.ativo:
@@ -118,8 +121,12 @@ class GerenciadorMeteoros:
             self.meteoros.append(meteoro)
     
     def atualizar(self, mapa, camera_x):
+        impactos = []
         for meteoro in self.meteoros:
-            meteoro.atualizar(mapa)
+            colisao = meteoro.atualizar(mapa)
+            if colisao:
+                # colisao agora é o rect do bloco atingido
+                impactos.append(colisao)
         
         self.meteoros = [m for m in self.meteoros if m.ativo]
         
@@ -128,6 +135,8 @@ class GerenciadorMeteoros:
             self.spawn_meteoro(camera_x)
             self.contador_spawn = 0
             self.proximo_spawn = random.randint(self.spawn_aleatorio_min, self.spawn_aleatorio_max)
+            
+        return impactos
     
     def desenhar(self, superficie, camera_x, camera_y):
         for meteoro in self.meteoros:

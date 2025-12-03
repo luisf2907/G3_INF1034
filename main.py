@@ -11,7 +11,10 @@ from assets import Assets
 from mapa import Mapa
 from jogador import Jogador
 from camera import Camera
+from camera import Camera
 from meteoro import GerenciadorMeteoros
+from ovo import GerenciadorOvos
+from fogo import GerenciadorFogo
 
 class Jogo:
     """Classe principal do jogo"""
@@ -45,8 +48,17 @@ class Jogo:
         # Criar gerenciador de meteoros
         self.gerenciador_meteoros = GerenciadorMeteoros(self.assets, self.mapa.largura_px)
         
+        # Criar gerenciador de ovos
+        self.gerenciador_ovos = GerenciadorOvos(self.assets)
+        posicoes_ovos = self.mapa.extrair_ovos()
+        self.gerenciador_ovos.adicionar_ovos(posicoes_ovos)
+        
+        # Criar gerenciador de fogo
+        self.gerenciador_fogo = GerenciadorFogo(self.assets)
+        
         # Fonte para Game Over
         self.fonte_game_over = pygame.font.Font(None, 20)
+        self.fonte_hud = pygame.font.Font(None, 16)
         
         # Controles
         self.relogio = pygame.time.Clock()
@@ -72,6 +84,16 @@ class Jogo:
         """Reinicia o jogo"""
         self.jogador = Jogador(50, 100, self.assets)
         self.gerenciador_meteoros = GerenciadorMeteoros(self.assets, self.mapa.largura_px)
+        
+        # Recarregar ovos
+        self.gerenciador_ovos = GerenciadorOvos(self.assets)
+        # Precisamos recarregar o mapa para recuperar os ovos originais
+        self.mapa = Mapa('mapa1.txt', self.assets)
+        posicoes_ovos = self.mapa.extrair_ovos()
+        self.gerenciador_ovos.adicionar_ovos(posicoes_ovos)
+        
+        self.gerenciador_fogo = GerenciadorFogo(self.assets)
+        
         self.game_over = False
     
     def atualizar(self):
@@ -88,13 +110,24 @@ class Jogo:
         self.camera.atualizar(self.jogador.x, self.jogador.y)
         
         # 3. Atualiza meteoros
-        self.gerenciador_meteoros.atualizar(self.mapa, self.camera.x)
+        impactos = self.gerenciador_meteoros.atualizar(self.mapa, self.camera.x)
+        
+        # Criar fogo onde meteoros caíram
+        for rect_colisao in impactos:
+            self.gerenciador_fogo.adicionar_fogo(rect_colisao)
         
         # 4. Verifica colisão com meteoros
         if self.gerenciador_meteoros.verificar_colisao_jogador(self.jogador.get_hitbox()):
             self.jogador.receber_dano()
+            
+        # 5. Atualiza ovos
+        self.gerenciador_ovos.atualizar(self.jogador.get_hitbox())
         
-        # 5. Verifica Game Over (espera animação terminar)
+        # 6. Atualiza fogo e verifica colisão
+        if self.gerenciador_fogo.atualizar(self.jogador.get_hitbox()):
+            self.jogador.receber_dano()
+        
+        # 7. Verifica Game Over (espera animação terminar)
         if self.jogador.morto and self.jogador.animacao_morte_completa:
             self.game_over = True
     
@@ -106,6 +139,29 @@ class Jogo:
         for i in range(self.jogador.vidas):
             self.superficie_virtual.blit(self.assets.icone_vida, (x, y))
             x += ICONE_VIDA_ESPACAMENTO
+            
+        # Desenhar contador de ovos
+        # Usar o primeiro frame do ovo como ícone
+        icone_ovo = self.assets.ovo_sprites[0]
+        # Reduzir para 16x16
+        icone_ovo = pygame.transform.scale(icone_ovo, (16, 16))
+        
+        texto_ovos = f"x {self.gerenciador_ovos.ovos_coletados}"
+        superficie_texto = self.fonte_hud.render(texto_ovos, True, (255, 255, 255))
+        
+        largura_texto = superficie_texto.get_width()
+        altura_texto = superficie_texto.get_height()
+        
+        # Ajustar posição
+        x_ovo = LARGURA_VIRTUAL - 30 - largura_texto
+        y_ovo = 5
+        
+        # Centralizar verticalmente o texto em relação ao ícone (16px)
+        offset_y_texto = (16 - altura_texto) // 2
+        
+        self.superficie_virtual.blit(icone_ovo, (x_ovo, y_ovo)) 
+        # Reduzir espaçamento para 18px (ícone tem 16px, então 2px de gap)
+        self.superficie_virtual.blit(superficie_texto, (x_ovo + 18, y_ovo + offset_y_texto))
     
     def desenhar_game_over(self):
         """Desenha a tela de Game Over"""
@@ -136,6 +192,20 @@ class Jogo:
         
         # Desenhar meteoros
         self.gerenciador_meteoros.desenhar(
+            self.superficie_virtual,
+            self.camera.x,
+            self.camera.y
+        )
+        
+        # Desenhar ovos
+        self.gerenciador_ovos.desenhar(
+            self.superficie_virtual,
+            self.camera.x,
+            self.camera.y
+        )
+        
+        # Desenhar fogo
+        self.gerenciador_fogo.desenhar(
             self.superficie_virtual,
             self.camera.x,
             self.camera.y

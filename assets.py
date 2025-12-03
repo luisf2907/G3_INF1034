@@ -25,6 +25,10 @@ class Assets:
         self.dino_hurt = []
         self.dino_dead = []
         self.meteoro_sprites = []
+        self.ovo_sprites = []
+        self.fogo_start = []
+        self.fogo_loop = []
+        self.fogo_end = []
         self.icone_vida = None
         # Novo atributo para o background
         self.background = None
@@ -108,6 +112,21 @@ class Assets:
                 frame = sprite_sheet_meteoro.subsurface((i * 10, 0, 10, 19))
                 self.meteoro_sprites.append(frame)
             
+            # Sprite sheet do ovo (4 frames, 24x24 cada)
+            sprite_sheet_ovo = pygame.image.load('assets/ovo.png').convert_alpha()
+            self.ovo_sprites = self._extrair_frames(sprite_sheet_ovo, 4)
+            
+            # Sprites do fogo (24x32)
+            # Start: 96x32 -> 4 frames
+            # Loop: 192x32 -> 8 frames
+            # End: 120x32 -> 5 frames
+            # Precisamos de um método customizado ou adaptar o _extrair_frames para aceitar tamanho customizado
+            # Como _extrair_frames usa SPRITE_LARGURA/ALTURA (24x24), vamos criar um helper local ou fazer inline
+            
+            self.fogo_start = self._extrair_frames_custom(pygame.image.load('assets/burning_start_1.png').convert_alpha(), 4, 24, 32)
+            self.fogo_loop = self._extrair_frames_custom(pygame.image.load('assets/burning_loop_1.png').convert_alpha(), 8, 24, 32)
+            self.fogo_end = self._extrair_frames_custom(pygame.image.load('assets/burning_end_1.png').convert_alpha(), 5, 24, 32)
+            
             # Ícone de vida
             self.icone_vida = pygame.image.load('assets/vida.png').convert_alpha()
             
@@ -123,6 +142,16 @@ class Assets:
         for i in range(num_frames):
             frame = sprite_sheet.subsurface(
                 (i * SPRITE_LARGURA, 0, SPRITE_LARGURA, SPRITE_ALTURA)
+            )
+            frames.append(frame)
+        return frames
+
+    def _extrair_frames_custom(self, sprite_sheet, num_frames, largura, altura):
+        """Extrai frames com tamanho customizado"""
+        frames = []
+        for i in range(num_frames):
+            frame = sprite_sheet.subsurface(
+                (i * largura, 0, largura, altura)
             )
             frames.append(frame)
         return frames
