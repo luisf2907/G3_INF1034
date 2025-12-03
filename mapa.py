@@ -96,6 +96,12 @@ class Mapa:
                     superficie.blit(self.assets.tile_terra_lateral_esq, (x, y))
                 elif tile == '>':  # Terra Lateral Direita
                     superficie.blit(self.assets.tile_terra_lateral_dir, (x, y))
+                elif tile == 'e':  # Ponta Esquerda Inferior
+                    superficie.blit(self.assets.tile_ponta_esq_inf, (x, y))
+                elif tile == 'd':  # Ponta Direita Inferior
+                    superficie.blit(self.assets.tile_ponta_dir_inf, (x, y))
+                elif tile == 'v':  # Ponta Inferior
+                    superficie.blit(self.assets.tile_ponta_inf, (x, y))
         
         return superficie.convert()
     
@@ -114,7 +120,7 @@ class Mapa:
                 if row < len(self.dados) and col < len(self.dados[row]):
                     tile = self.dados[row][col]
                     # Tiles sólidos
-                    if tile in ['G', 'T', 'E', 'D', 'L', 'R', '<', '>']:
+                    if tile in ['G', 'T', 'E', 'D', 'L', 'R', '<', '>', 'e', 'd', 'v']:
                         tile_rect = pygame.Rect(
                             col * TILE_SIZE,
                             row * TILE_SIZE,

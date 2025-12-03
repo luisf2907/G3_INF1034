@@ -25,6 +25,11 @@ class Jogador:
         self.no_chao = False
         self.direcao = 1  # 1 = direita, -1 = esquerda
         
+        # Wall Jump
+        self.na_parede_esq = False
+        self.na_parede_dir = False
+        self.vel_x_impulso = 0
+        
         # Animação
         self.frame_atual = 0
         self.contador_animacao = 0
@@ -60,6 +65,21 @@ class Jogador:
             self.estado = "pulando"
             self.frame_pulo = 0
             self.no_chao = False
+        # Wall Jump / Climb
+        elif (self.na_parede_esq or self.na_parede_dir) and not self.levou_dano and not self.morto:
+            # Pulo normal para escalar
+            self.vel_y = self.forca_pulo
+            self.estado = "pulando"
+            self.frame_pulo = 0
+            
+            # Pequeno impulso para desgrudar levemente, permitindo escalar
+            # Se o jogador continuar segurando a tecla, ele volta para a parede
+            if self.na_parede_esq:
+                self.vel_x_impulso = self.velocidade * 0.5
+                # Não mudamos a direção para facilitar o "segurar contra a parede"
+            else:
+                self.vel_x_impulso = -self.velocidade * 0.5
+                # Não mudamos a direção
     
     def receber_dano(self):
         """Aplica dano ao jogador"""
@@ -145,17 +165,30 @@ class Jogador:
             self._atualizar_animacao()
             return
         
+        # Resetar flags de parede
+        self.na_parede_esq = False
+        self.na_parede_dir = False
+
         # Movimento horizontal
         movendo = False
         dx = 0
         
+        # Aplicar impulso (decai com o tempo)
+        if abs(self.vel_x_impulso) > 0.1:
+            dx += self.vel_x_impulso
+            self.vel_x_impulso *= 0.92 # Decaimento um pouco mais lento para manter o arco
+        else:
+            self.vel_x_impulso = 0
+        
         if teclas[pygame.K_LEFT]:
-            dx = -self.velocidade
-            self.direcao = -1
+            dx -= self.velocidade
+            if self.vel_x_impulso == 0: # Só muda direção se não estiver sob impulso forte
+                self.direcao = -1
             movendo = True
         if teclas[pygame.K_RIGHT]:
-            dx = self.velocidade
-            self.direcao = 1
+            dx += self.velocidade
+            if self.vel_x_impulso == 0:
+                self.direcao = 1
             movendo = True
         
         # Aplicar movimento horizontal e verificar colisão
@@ -167,8 +200,12 @@ class Jogador:
             if tile_rect.colliderect(hitbox):
                 if dx > 0:
                     self.x = tile_rect.left - HITBOX_OFFSET_X - HITBOX_LARGURA
+                    self.na_parede_dir = True
+                    self.vel_x_impulso = 0 # Zera impulso ao bater na parede
                 elif dx < 0:
                     self.x = tile_rect.right - HITBOX_OFFSET_X
+                    self.na_parede_esq = True
+                    self.vel_x_impulso = 0
                 hitbox.x = self.x + HITBOX_OFFSET_X
         
         # Aplicar gravidade

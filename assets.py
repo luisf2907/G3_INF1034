@@ -19,6 +19,9 @@ class Assets:
         self.tile_terra_dir_esq = None
         self.tile_terra_lateral_esq = None
         self.tile_terra_lateral_dir = None
+        self.tile_ponta_esq_inf = None
+        self.tile_ponta_dir_inf = None
+        self.tile_ponta_inf = None
         self.dino_idle = []
         self.dino_move = []
         self.dino_jump = []
@@ -91,6 +94,9 @@ class Assets:
             self.tile_terra_dir_esq = pygame.image.load('assets/terra_direita_esquerda.png').convert_alpha()
             self.tile_terra_lateral_esq = pygame.image.load('assets/terra_lateral_esquerda.png').convert_alpha()
             self.tile_terra_lateral_dir = pygame.image.load('assets/terra_lateral_direita.png').convert_alpha()
+            self.tile_ponta_esq_inf = pygame.image.load('assets/grass_ponta_esquerda_inferior.png').convert_alpha()
+            self.tile_ponta_dir_inf = pygame.image.load('assets/grass_ponta_direita_inferior.png').convert_alpha()
+            self.tile_ponta_inf = pygame.image.load('assets/grass_ponta_inferior.png').convert_alpha()
             
             # Sprite sheets do dino
             sprite_sheet_idle = pygame.image.load('assets/idle.png').convert_alpha()

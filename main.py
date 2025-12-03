@@ -37,7 +37,7 @@ class Jogo:
         self.assets = Assets()
         
         # Criar mapa
-        self.mapa = Mapa('mapa1.txt', self.assets)
+        self.mapa = Mapa('mapa_15x120.txt', self.assets)
         
         # Criar jogador
         self.jogador = Jogador(50, 100, self.assets)
@@ -88,7 +88,7 @@ class Jogo:
         # Recarregar ovos
         self.gerenciador_ovos = GerenciadorOvos(self.assets)
         # Precisamos recarregar o mapa para recuperar os ovos originais
-        self.mapa = Mapa('mapa1.txt', self.assets)
+        self.mapa = Mapa('mapa_15x120.txt', self.assets)
         posicoes_ovos = self.mapa.extrair_ovos()
         self.gerenciador_ovos.adicionar_ovos(posicoes_ovos)
         
