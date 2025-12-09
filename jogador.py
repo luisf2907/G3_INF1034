@@ -43,6 +43,9 @@ class Jogador:
         self.vidas = VIDAS_INICIAIS
         self.morto = False
         self.animacao_morte_completa = False
+        
+        # Sistema de moedas
+        self.moedas_coletadas = 0
     
     def get_hitbox(self):
         """Retorna o retângulo de colisão do jogador"""
@@ -310,3 +313,7 @@ class Jogador:
             return  # Não desenha (cria efeito de piscar)
         
         superficie.blit(sprite, (tela_x, tela_y))
+    
+    def adicionar_moeda(self):
+        """Incrementa o contador de moedas coletadas"""
+        self.moedas_coletadas += 1

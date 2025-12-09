@@ -15,6 +15,22 @@ class Mapa:
         self.largura_px = len(self.dados[0]) * TILE_SIZE
         self.altura_px = len(self.dados) * TILE_SIZE
         self.superficie = self._pre_renderizar()
+        self.posicoes_moedas = self._extrair_moedas()
+    
+    def _extrair_moedas(self):
+        """Extrai posições de moedas do mapa"""
+        moedas = []
+        for linha_idx, linha in enumerate(self.dados):
+            for coluna_idx, tile in enumerate(linha):
+                if tile == 'C':  # C = Coin (moeda)
+                    x = coluna_idx * TILE_SIZE + TILE_SIZE // 2
+                    y = linha_idx * TILE_SIZE + TILE_SIZE // 2
+                    moedas.append((x, y))
+        return moedas
+    
+    def debug_moedas(self):
+        """Exibe informações sobre as moedas carregadas"""
+        pass
     
     def _carregar_mapa(self, arquivo):
         """Carrega o mapa de um arquivo de texto"""

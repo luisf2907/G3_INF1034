@@ -4,7 +4,7 @@ Gerenciamento de carregamento de assets (imagens, sprites)
 import pygame
 import sys
 # Adicionamos LARGURA_VIRTUAL e ALTURA_VIRTUAL nas importações
-from config import SPRITE_LARGURA, SPRITE_ALTURA, FRAMES_IDLE, FRAMES_MOVE, FRAMES_JUMP, FRAMES_HURT, FRAMES_DEAD, LARGURA_VIRTUAL, ALTURA_VIRTUAL
+from config import SPRITE_LARGURA, SPRITE_ALTURA, FRAMES_IDLE, FRAMES_MOVE, FRAMES_JUMP, FRAMES_HURT, FRAMES_DEAD, LARGURA_VIRTUAL, ALTURA_VIRTUAL, FRAMES_MOEDA
 
 
 class Assets:
@@ -25,6 +25,7 @@ class Assets:
         self.dino_hurt = []
         self.dino_dead = []
         self.meteoro_sprites = []
+        self.moeda_sprites = []
         self.icone_vida = None
         # Novo atributo para o background
         self.background = None
@@ -75,7 +76,6 @@ class Assets:
                 self.background = pygame.transform.scale(bg_raw, (LARGURA_VIRTUAL, ALTURA_VIRTUAL))
             except FileNotFoundError:
                 # Se não achar o background, cria um gradiente de pôr do sol apocalíptico
-                print("background.png não encontrado. Usando gradiente apocalíptico.")
                 self.background = self._criar_background_apocaliptico()
 
             # Tiles do mapa
@@ -108,12 +108,19 @@ class Assets:
                 frame = sprite_sheet_meteoro.subsurface((i * 10, 0, 10, 19))
                 self.meteoro_sprites.append(frame)
             
+            # Sprite sheet das moedas
+            try:
+                sprite_sheet_moeda = pygame.image.load('assets/moeda.png').convert_alpha()
+                # Extrair frames de moeda (tamanho diferente do sprite padrão)
+                self.moeda_sprites = self._extrair_frames_moeda(sprite_sheet_moeda, FRAMES_MOEDA)
+            except FileNotFoundError:
+                # Se não tiver moeda.png, cria sprites simples
+                self.moeda_sprites = self._criar_moedas_procedurais()
+            
             # Ícone de vida
             self.icone_vida = pygame.image.load('assets/vida.png').convert_alpha()
             
         except FileNotFoundError as e:
-            print(f"Erro: Imagem não encontrada -> {e}")
-            print("Certifique-se de que todos os arquivos de imagem estão na pasta.")
             pygame.quit()
             sys.exit()
     
@@ -126,3 +133,14 @@ class Assets:
             )
             frames.append(frame)
         return frames
+    
+    def _extrair_frames_moeda(self, sprite_sheet, num_frames):
+        """Extrai frames de moeda (tamanho fixo de 16x16)"""
+        frames = []
+        for i in range(num_frames):
+            frame = sprite_sheet.subsurface(
+                (i * 16, 0, 16, 16)
+            )
+            frames.append(frame)
+        return frames
+    

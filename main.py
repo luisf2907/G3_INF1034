@@ -5,13 +5,15 @@ Arquivo principal
 import pygame
 from config import (
     LARGURA, ALTURA, LARGURA_VIRTUAL, ALTURA_VIRTUAL, FPS,
-    ICONE_VIDA_ESPACAMENTO, ICONE_VIDA_MARGEM_X, ICONE_VIDA_MARGEM_Y
+    ICONE_VIDA_ESPACAMENTO, ICONE_VIDA_MARGEM_X, ICONE_VIDA_MARGEM_Y,
+    PONTOS_POR_MOEDA
 )
 from assets import Assets
 from mapa import Mapa
 from jogador import Jogador
 from camera import Camera
 from meteoro import GerenciadorMeteoros
+from moeda import GerenciadorMoedas
 
 class Jogo:
     """Classe principal do jogo"""
@@ -45,13 +47,27 @@ class Jogo:
         # Criar gerenciador de meteoros
         self.gerenciador_meteoros = GerenciadorMeteoros(self.assets, self.mapa.largura_px)
         
+        # Criar gerenciador de moedas
+        self.gerenciador_moedas = GerenciadorMoedas(self.assets, self.mapa.largura_px)
+        
+        # Carregar moedas do mapa
+        self._carregar_moedas_do_mapa()
+        
         # Fonte para Game Over
         self.fonte_game_over = pygame.font.Font(None, 20)
+        
+        # Fonte para HUD (moedas, pontos)
+        self.fonte_hud = pygame.font.Font(None, 16)
         
         # Controles
         self.relogio = pygame.time.Clock()
         self.rodando = True
         self.game_over = False
+    
+    def _carregar_moedas_do_mapa(self):
+        """Carrega todas as moedas definidas no mapa"""
+        for x, y in self.mapa.posicoes_moedas:
+            self.gerenciador_moedas.adicionar_moeda(x, y)
     
     def processar_eventos(self):
         """Processa eventos do pygame"""
@@ -72,6 +88,8 @@ class Jogo:
         """Reinicia o jogo"""
         self.jogador = Jogador(50, 100, self.assets)
         self.gerenciador_meteoros = GerenciadorMeteoros(self.assets, self.mapa.largura_px)
+        self.gerenciador_moedas = GerenciadorMoedas(self.assets, self.mapa.largura_px)
+        self._carregar_moedas_do_mapa()
         self.game_over = False
     
     def atualizar(self):
@@ -90,22 +108,35 @@ class Jogo:
         # 3. Atualiza meteoros
         self.gerenciador_meteoros.atualizar(self.mapa, self.camera.x)
         
-        # 4. Verifica colisão com meteoros
+        # 4. Atualiza moedas
+        self.gerenciador_moedas.atualizar(self.camera.x)
+        
+        # 5. Verifica colisão com meteoros
         if self.gerenciador_meteoros.verificar_colisao_jogador(self.jogador.get_hitbox()):
             self.jogador.receber_dano()
         
-        # 5. Verifica Game Over (espera animação terminar)
+        # 6. Verifica colisão com moedas
+        pontos_moedas = self.gerenciador_moedas.verificar_colisao_jogador(self.jogador.get_hitbox())
+        for _ in range(pontos_moedas // PONTOS_POR_MOEDA):
+            self.jogador.adicionar_moeda()
+        
+        # 7. Verifica Game Over (espera animação terminar)
         if self.jogador.morto and self.jogador.animacao_morte_completa:
             self.game_over = True
     
     def desenhar_hud(self):
-        """Desenha a interface (vidas)"""
+        """Desenha a interface (vidas, moedas, pontos)"""
+        # Desenhar vidas
         x = ICONE_VIDA_MARGEM_X
         y = ICONE_VIDA_MARGEM_Y
         
         for i in range(self.jogador.vidas):
             self.superficie_virtual.blit(self.assets.icone_vida, (x, y))
             x += ICONE_VIDA_ESPACAMENTO
+        
+        # Desenhar moedas coletadas
+        texto_moedas = self.fonte_hud.render(f"Moedas: {self.jogador.moedas_coletadas}", True, (255, 215, 0))
+        self.superficie_virtual.blit(texto_moedas, (LARGURA_VIRTUAL - 80, ICONE_VIDA_MARGEM_Y))
     
     def desenhar_game_over(self):
         """Desenha a tela de Game Over"""
@@ -136,6 +167,13 @@ class Jogo:
         
         # Desenhar meteoros
         self.gerenciador_meteoros.desenhar(
+            self.superficie_virtual,
+            self.camera.x,
+            self.camera.y
+        )
+        
+        # Desenhar moedas
+        self.gerenciador_moedas.desenhar(
             self.superficie_virtual,
             self.camera.x,
             self.camera.y
