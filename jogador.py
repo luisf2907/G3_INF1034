@@ -6,8 +6,9 @@ from config import (
     DINO_VELOCIDADE, DINO_GRAVIDADE, DINO_FORCA_PULO,
     HITBOX_OFFSET_X, HITBOX_OFFSET_Y, HITBOX_LARGURA, HITBOX_ALTURA,
     VELOCIDADE_ANIMACAO_IDLE, VELOCIDADE_ANIMACAO_MOVE, VELOCIDADE_ANIMACAO_JUMP,
-    VELOCIDADE_ANIMACAO_HURT, VELOCIDADE_ANIMACAO_DEAD, DURACAO_HURT, 
-    DURACAO_INVENCIBILIDADE, VIDAS_INICIAIS
+    VELOCIDADE_ANIMACAO_HURT, VELOCIDADE_ANIMACAO_DEAD, VELOCIDADE_ANIMACAO_DASH,
+    DURACAO_HURT, DURACAO_INVENCIBILIDADE, VIDAS_INICIAIS,
+    DASH_VELOCIDADE, DASH_DURACAO, DASH_COOLDOWN
 )
 
 
@@ -48,6 +49,12 @@ class Jogador:
         self.vidas = VIDAS_INICIAIS
         self.morto = False
         self.animacao_morte_completa = False
+        
+        # Sistema de Dash
+        self.dashing = False
+        self.dash_contador = 0
+        self.dash_cooldown = 0
+        self.dash_direcao = 1
     
     def get_hitbox(self):
         """Retorna o retângulo de colisão do jogador"""
@@ -80,6 +87,19 @@ class Jogador:
             else:
                 self.vel_x_impulso = -self.velocidade * 0.5
                 # Não mudamos a direção
+    
+    def iniciar_dash(self):
+        """Inicia o dash se não estiver em cooldown"""
+        if not self.dashing and self.dash_cooldown <= 0 and not self.levou_dano and not self.morto:
+            self.dashing = True
+            self.dash_contador = DASH_DURACAO
+            self.dash_cooldown = DASH_COOLDOWN
+            self.dash_direcao = self.direcao
+            self.estado = "dash"
+            self.frame_atual = 0
+            self.contador_animacao = 0
+            # Durante o dash, o jogador fica invencível
+            self.invencivel = True
     
     def receber_dano(self):
         """Aplica dano ao jogador"""
@@ -127,6 +147,10 @@ class Jogador:
             self._atualizar_animacao()
             return
         
+        # Atualizar cooldown do dash
+        if self.dash_cooldown > 0:
+            self.dash_cooldown -= 1
+        
         # Atualizar sistema de dano
         if self.levou_dano:
             self.contador_hurt += 1
@@ -135,7 +159,7 @@ class Jogador:
                 self.contador_hurt = 0
                 self.frame_atual = 0
         
-        if self.invencivel:
+        if self.invencivel and not self.dashing:
             self.contador_invencibilidade += 1
             if self.contador_invencibilidade >= DURACAO_INVENCIBILIDADE:
                 self.invencivel = False
@@ -161,6 +185,64 @@ class Jogador:
                         self.y = tile_rect.bottom - HITBOX_OFFSET_Y
                         self.vel_y = 0
                     hitbox.y = self.y + HITBOX_OFFSET_Y
+            
+            self._atualizar_animacao()
+            return
+        
+        # Se está em dash
+        if self.dashing:
+            self.dash_contador -= 1
+            
+            # Movimento horizontal do dash
+            dx = DASH_VELOCIDADE * self.dash_direcao
+            
+            # Aplicar movimento horizontal e verificar colisão
+            self.x += dx
+            hitbox = self.get_hitbox()
+            colisoes = mapa.get_retangulos_colisao(hitbox)
+            
+            for tile_rect in colisoes:
+                if tile_rect.colliderect(hitbox):
+                    if dx > 0:
+                        self.x = tile_rect.left - HITBOX_OFFSET_X - HITBOX_LARGURA
+                    elif dx < 0:
+                        self.x = tile_rect.right - HITBOX_OFFSET_X
+                    hitbox.x = self.x + HITBOX_OFFSET_X
+                    # Cancelar dash ao bater em parede
+                    self.dash_contador = 0
+            
+            # Limitar aos limites horizontais do mapa durante dash
+            if self.x < 0:
+                self.x = 0
+                self.dash_contador = 0
+            elif self.x + HITBOX_OFFSET_X + HITBOX_LARGURA > mapa.largura_px:
+                self.x = mapa.largura_px - HITBOX_OFFSET_X - HITBOX_LARGURA
+                self.dash_contador = 0
+            
+            # Aplicar gravidade reduzida durante dash (para dar sensação de flutuar)
+            self.vel_y += self.gravidade * 0.3
+            dy = self.vel_y
+            
+            self.y += dy
+            hitbox = self.get_hitbox()
+            colisoes = mapa.get_retangulos_colisao(hitbox)
+            
+            for tile_rect in colisoes:
+                if tile_rect.colliderect(hitbox):
+                    if dy > 0:
+                        self.y = tile_rect.top - HITBOX_OFFSET_Y - HITBOX_ALTURA
+                        self.vel_y = 0
+                        self.no_chao = True
+                    elif dy < 0:
+                        self.y = tile_rect.bottom - HITBOX_OFFSET_Y
+                        self.vel_y = 0
+                    hitbox.y = self.y + HITBOX_OFFSET_Y
+            
+            # Verificar se o dash terminou
+            if self.dash_contador <= 0:
+                self.dashing = False
+                # Iniciar invencibilidade pós-dash
+                self.contador_invencibilidade = 0
             
             self._atualizar_animacao()
             return
@@ -208,6 +290,14 @@ class Jogador:
                     self.vel_x_impulso = 0
                 hitbox.x = self.x + HITBOX_OFFSET_X
         
+        # Limitar aos limites horizontais do mapa
+        if self.x < 0:
+            self.x = 0
+            self.vel_x_impulso = 0
+        elif self.x + HITBOX_OFFSET_X + HITBOX_LARGURA > mapa.largura_px:
+            self.x = mapa.largura_px - HITBOX_OFFSET_X - HITBOX_LARGURA
+            self.vel_x_impulso = 0
+        
         # Aplicar gravidade
         self.vel_y += self.gravidade
         dy = self.vel_y
@@ -242,6 +332,16 @@ class Jogador:
                     self.vel_y = 0
                 hitbox.y = self.y + HITBOX_OFFSET_Y
         
+        # Verificar queda no void (abaixo do mapa)
+        if self.y > mapa.altura_px:
+            self.vidas = 0
+            self.morto = True
+            self.estado = "morto"
+            self.frame_atual = 0
+            self.contador_animacao = 0
+            self.animacao_morte_completa = True  # Morte instantânea no void
+            return
+        
         # Atualizar estado
         if not self.no_chao:
             self.estado = "pulando"
@@ -275,6 +375,14 @@ class Jogador:
                     self.frame_atual += 1
                 else:
                     self.animacao_morte_completa = True
+                self.contador_animacao = 0
+            return
+        
+        # Animação de dash
+        if self.dashing:
+            self.contador_animacao += 1
+            if self.contador_animacao >= VELOCIDADE_ANIMACAO_DASH:
+                self.frame_atual = (self.frame_atual + 1) % 6
                 self.contador_animacao = 0
             return
         
@@ -327,6 +435,8 @@ class Jogador:
         # Selecionar sprite correto
         if self.morto:
             sprite = self.assets.dino_dead[min(self.frame_atual, 4)]
+        elif self.dashing:
+            sprite = self.assets.dino_dash[min(self.frame_atual, 5)]
         elif self.levou_dano or self.estado == "hurt":
             sprite = self.assets.dino_hurt[min(self.frame_atual, 3)]
         elif self.estado == "idle":
@@ -339,11 +449,13 @@ class Jogador:
             sprite = self.assets.dino_idle[0]
         
         # Flipar sprite se estiver virado para esquerda
-        if self.direcao == -1:
+        # Durante o dash, usa a direção do dash
+        direcao_atual = self.dash_direcao if self.dashing else self.direcao
+        if direcao_atual == -1:
             sprite = pygame.transform.flip(sprite, True, False)
         
-        # Efeito de piscar durante invencibilidade (não aplica se morto)
-        if not self.morto and self.invencivel and (self.contador_invencibilidade // 5) % 2 == 0:
+        # Efeito de piscar durante invencibilidade (não aplica se morto ou em dash)
+        if not self.morto and not self.dashing and self.invencivel and (self.contador_invencibilidade // 5) % 2 == 0:
             return  # Não desenha (cria efeito de piscar)
         
         superficie.blit(sprite, (tela_x, tela_y))

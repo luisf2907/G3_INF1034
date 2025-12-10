@@ -29,6 +29,7 @@ VELOCIDADE_ANIMACAO_MOVE = 6
 VELOCIDADE_ANIMACAO_JUMP = 15
 VELOCIDADE_ANIMACAO_HURT = 8
 VELOCIDADE_ANIMACAO_DEAD = 10
+VELOCIDADE_ANIMACAO_DASH = 3
 
 # Sprites
 SPRITE_LARGURA = 24
@@ -38,6 +39,12 @@ FRAMES_MOVE = 6
 FRAMES_JUMP = 4
 FRAMES_HURT = 4
 FRAMES_DEAD = 5
+FRAMES_DASH = 6
+
+# Dash
+DASH_VELOCIDADE = 8  # Velocidade do dash (muito mais rápido que normal)
+DASH_DURACAO = 12  # Frames de duração do dash
+DASH_COOLDOWN = 45  # Frames de cooldown entre dashes
 
 # Sistema de dano
 DURACAO_HURT = 60  # frames de duração da animação de dano

@@ -77,6 +77,9 @@ class Jogo:
                 if evento.key in (pygame.K_SPACE, pygame.K_UP):
                     if not self.game_over:
                         self.jogador.pular()
+                if evento.key == pygame.K_LSHIFT:
+                    if not self.game_over:
+                        self.jogador.iniciar_dash()
                 if evento.key == pygame.K_r and self.game_over:
                     self.reiniciar()
     

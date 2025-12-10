@@ -4,7 +4,7 @@ Gerenciamento de carregamento de assets (imagens, sprites)
 import pygame
 import sys
 # Adicionamos LARGURA_VIRTUAL e ALTURA_VIRTUAL nas importações
-from config import SPRITE_LARGURA, SPRITE_ALTURA, FRAMES_IDLE, FRAMES_MOVE, FRAMES_JUMP, FRAMES_HURT, FRAMES_DEAD, LARGURA_VIRTUAL, ALTURA_VIRTUAL
+from config import SPRITE_LARGURA, SPRITE_ALTURA, FRAMES_IDLE, FRAMES_MOVE, FRAMES_JUMP, FRAMES_HURT, FRAMES_DEAD, FRAMES_DASH, LARGURA_VIRTUAL, ALTURA_VIRTUAL
 
 
 class Assets:
@@ -27,6 +27,7 @@ class Assets:
         self.dino_jump = []
         self.dino_hurt = []
         self.dino_dead = []
+        self.dino_dash = []
         self.meteoro_sprites = []
         self.ovo_sprites = []
         self.fogo_start = []
@@ -104,6 +105,7 @@ class Assets:
             sprite_sheet_jump = pygame.image.load('assets/jump.png').convert_alpha()
             sprite_sheet_hurt = pygame.image.load('assets/hurt.png').convert_alpha()
             sprite_sheet_dead = pygame.image.load('assets/dead.png').convert_alpha()
+            sprite_sheet_dash = pygame.image.load('assets/dash.png').convert_alpha()
             
             # Separar frames das animações
             self.dino_idle = self._extrair_frames(sprite_sheet_idle, FRAMES_IDLE)
@@ -111,6 +113,7 @@ class Assets:
             self.dino_jump = self._extrair_frames(sprite_sheet_jump, FRAMES_JUMP)
             self.dino_hurt = self._extrair_frames(sprite_sheet_hurt, FRAMES_HURT)
             self.dino_dead = self._extrair_frames(sprite_sheet_dead, FRAMES_DEAD)
+            self.dino_dash = self._extrair_frames(sprite_sheet_dash, FRAMES_DASH)
             
             # Sprite sheet do meteoro (3 frames, 10x19 cada)
             sprite_sheet_meteoro = pygame.image.load('assets/meteoro.png').convert_alpha()
